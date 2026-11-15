@@ -1,13 +1,3 @@
-"""
-Assignment 5 - Game Functions (Project)
-File: gamefunctions.py
-Description: Module containing game logic functions for purchasing items 
-             and generating random monsters, complete with test demonstrations.
-"""
-
-import random
-
-
 # ----------------------------------------------------------------------
 # Function Definitions
 # ----------------------------------------------------------------------
