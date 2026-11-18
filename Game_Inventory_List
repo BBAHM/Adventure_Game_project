@@ -1,1 +1,30 @@
+#Displays the state dictionary for the adventure game
+state = {
+    "player_name" : "Braelon",
+    "player_gold" : 506,
+    "player_inventory" : [
+        {"name" : "sword", "type" : "weapon", "maxDurability" : 75, "currentDurability" : 55},
+        {"name" : "Iron Side", "type" : "shield", "maxDurability" : 150, "currentDurability" : 115},
+        {"name" : "shield vial", "type" : "procConsumable", "note" : "last for a duration of 5 turns"}
+    ]
+    "store_inventory" : [
+        {"name" : "health vial", "type" : "hpConsumable", "note" : "adds 15 hp to current health", "cost" : 10}
+        {"name" : "Restore Durability", "type" : "equipmentConsumable", "note" : "Restores the durability of the affected item", "cost" : 20}
+        {"name" : "backpack", "type" : "inventoryUpgrade", "note" : "adds three additional spaces to player inventory", "cost" : 40}
+    ] 
+}
+#Visit to the store
+print(
+    "Welcome to the Store"
+    "Please take a look at what the store has to offer with prices beside"
+    ()
+    "/----------------------------------------------------------------------------------------------------------------\"
+    "| Health Vial", "Consumable", "Description: Adds 15hp to players health instantly.,                              |"
+    "| Restore Durability", "Equipment Consumable", "Description: Restores the durability of the chosen equipment.,   |"
+    "| Backpack", "Inventory Upgrade", "Description: Adds two spaces to the players inventory.,                       |"
+    "\----------------------------------------------------------------------------------------------------------------/"
+    ()
+)
+user_selection = input()
+
 
