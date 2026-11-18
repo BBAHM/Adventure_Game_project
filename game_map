@@ -1,0 +1,166 @@
+import random
+import pygame
+
+# --- Constants ---
+GRID_SIZE = 10
+CELL_SIZE = 32
+WINDOW_SIZE = GRID_SIZE * CELL_SIZE  # 320 x 320 pixels
+
+# Colors (R, G, B)
+WHITE = (255, 255, 255)
+GRAY = (200, 200, 200)
+BLUE = (50, 100, 255)  # Player
+GREEN = (40, 180, 60)  # Town
+RED = (220, 50, 50)  # Monster
+
+
+def move_player(game_state, direction):
+  """
+    direction is one of: 'up', 'down', 'left', 'right'
+    Updates map_state in place.
+    Returns a string describing what happened.
+    """
+  x, y = game_state['player_pos']
+
+  if direction == 'up':
+    y = max(0, y - 1)
+  elif direction == 'down':
+    y = min(GRID_SIZE - 1, y + 1)
+  elif direction == 'left':
+    x = max(0, x - 1)
+  elif direction == 'right':
+    x = min(GRID_SIZE - 1, x + 1)
+
+  game_state['player_pos'] = (x, y)
+
+  if (x, y) == game_state['town_pos']:
+    return 'returned_to_town'
+  elif (x, y) == game_state['monster_pos']:
+    return 'monster_encounter'
+  else:
+    return 'moved'
+
+
+def spawn_new_monster(game_state):
+  """Spawns a monster at a random location not occupied by the player or town."""
+  while True:
+    new_pos = (
+        random.randint(0, GRID_SIZE - 1),
+        random.randint(0, GRID_SIZE - 1),
+    )
+    if (
+        new_pos != game_state['player_pos']
+        and new_pos != game_state['town_pos']
+    ):
+      game_state['monster_pos'] = new_pos
+      break
+
+
+def run_map_interface(game_state):
+  """
+    Opens the 10x10 pygame window and handles movement until the player
+    returns to town or encounters a monster.
+    Returns: 'town' or 'monster'
+    """
+  pygame.init()
+  screen = pygame.display.set_mode((WINDOW_SIZE, WINDOW_SIZE))
+  pygame.display.set_caption('Adventure Map')
+  clock = pygame.time.Clock()
+
+  running = True
+  outcome = 'town'
+
+  while running:
+    # 1. Handle Input Events
+    for event in pygame.event.get():
+      if event.type == pygame.QUIT:
+        running = False
+        outcome = 'town'
+
+      elif event.type == pygame.KEYDOWN:
+        direction = None
+        if event.key == pygame.K_UP:
+          direction = 'up'
+        elif event.key == pygame.K_DOWN:
+          direction = 'down'
+        elif event.key == pygame.K_LEFT:
+          direction = 'left'
+        elif event.key == pygame.K_RIGHT:
+          direction = 'right'
+
+        if direction:
+          status = move_player(game_state, direction)
+
+          if status == 'returned_to_town':
+            outcome = 'town'
+            running = False
+          elif status == 'monster_encounter':
+            outcome = 'monster'
+            running = False
+
+    # 2. Draw Map & Entities
+    screen.fill(WHITE)
+
+    # Draw 10x10 grid lines
+    for row in range(GRID_SIZE):
+      for col in range(GRID_SIZE):
+        rect = pygame.Rect(
+            col * CELL_SIZE, row * CELL_SIZE, CELL_SIZE, CELL_SIZE
+        )
+        pygame.draw.rect(screen, GRAY, rect, 1)
+
+    # Draw Town (Green Circle)
+    tx, ty = game_state['town_pos']
+    town_center = (
+        tx * CELL_SIZE + CELL_SIZE // 2,
+        ty * CELL_SIZE + CELL_SIZE // 2,
+    )
+    pygame.draw.circle(screen, GREEN, town_center, CELL_SIZE // 2 - 4)
+
+    # Draw Monster (Red Circle)
+    mx, my = game_state['monster_pos']
+    monster_center = (
+        mx * CELL_SIZE + CELL_SIZE // 2,
+        my * CELL_SIZE + CELL_SIZE // 2,
+    )
+    pygame.draw.circle(screen, RED, monster_center, CELL_SIZE // 2 - 4)
+
+    # Draw Player (Blue Rectangle)
+    px, py = game_state['player_pos']
+    player_rect = pygame.Rect(
+        px * CELL_SIZE + 4, py * CELL_SIZE + 4, CELL_SIZE - 8, CELL_SIZE - 8
+    )
+    pygame.draw.rect(screen, BLUE, player_rect)
+
+    pygame.display.flip()
+    clock.tick(30)
+
+  pygame.quit()
+  return outcome
+
+
+# --- Example Main Game Loop Integration ---
+if __name__ == '__main__':
+  # Initialize game state dictionary
+  game_state = {'player_pos': (0, 0), 'town_pos': (0, 0), 'monster_pos': (5, 5)}
+
+  while True:
+    print('\n--- TOWN MENU ---')
+    print('1. Explore')
+    print('2. Quit')
+    choice = input('Choose an option: ')
+
+    if choice == '1':
+      # If player is currently on the town tile, move them one step off or let them explore
+      result = run_map_interface(game_state)
+
+      if result == 'town':
+        print('You safely returned to town!')
+      elif result == 'monster':
+        print('A wild monster appeared! Starting battle...')
+        # TODO: Call your existing fight_monster(game_state) function here
+        spawn_new_monster(game_state)
+
+    elif choice == '2':
+      print('Thanks for playing!')
+      break
